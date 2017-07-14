@@ -5,7 +5,7 @@ import * as THREE from 'three';
 import VertexShader from 'raw!../../shaders/example-v.shader';
 import FragmentShader from 'raw!../../shaders/example-f.shader';
 
-export default Object.assign( Object.create( BaseObject ), {
+export default _.assign( _.create( BaseObject ), {
 
 
     renderer: null,
@@ -21,7 +21,7 @@ export default Object.assign( Object.create( BaseObject ), {
     setup() {
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
-        this.renderer.setSize( this.windowData.width, this.windowData.height );
+        this.renderer.setSize( this.window_data.width, this.window_data.height );
         this.renderer.setClearColor( 'rgb(37, 26, 48)', 1 );
 
         this.scene = new THREE.Scene();
@@ -60,13 +60,13 @@ export default Object.assign( Object.create( BaseObject ), {
 
     onResize() {
 
-        this.uniforms.resolution.value = new THREE.Vector2( this.windowData.width, this.windowData.height );
+        this.uniforms.resolution.value = new THREE.Vector2( this.window_data.width, this.window_data.height );
 
-        this.camera.aspect = this.windowData.ratio;
+        this.camera.aspect = this.window_data.ratio;
         this.camera.updateProjectionMatrix();
 
         this.renderer.setPixelRatio( window.devicePixelRatio );
-        this.renderer.setSize( this.windowData.width, this.windowData.height );
+        this.renderer.setSize( this.window_data.width, this.window_data.height );
     },
 
     onMouseMove() {

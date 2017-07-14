@@ -1,6 +1,3 @@
-let AnimationFrame = require('animation-frame');
-AnimationFrame.shim();
-
 if ( module.hot ) { module.hot.accept(); }
 
 if ( !global._babelPolyfill ) { require('babel-polyfill'); }

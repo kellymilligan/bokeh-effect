@@ -1,12 +1,12 @@
 import { _, $, BaseObject } from '../../common';
 
-export default Object.assign( Object.create( BaseObject ), {
+export default _.assign( _.create( BaseObject ), {
 
 
     canvas      : null,
     ctx         : null,
 
-    pixelRatio  : 1,
+    pixel_ratio : 1,
 
     invalidated : false,
 
@@ -19,20 +19,19 @@ export default Object.assign( Object.create( BaseObject ), {
         this.node.append( this.canvas );
 
         this.resize();
-        this.invalidated = true;
     },
 
     onResize() {
 
-        this.pixelRatio = window.devicePixelRatio || 1;
+        this.pixel_ratio = window.devicePixel_ratio || 1;
 
-        this.canvas.width = this.windowData.width * this.pixelRatio;
-        this.canvas.height = this.windowData.height * this.pixelRatio;
+        this.canvas.width = this.window_data.width * this.pixel_ratio;
+        this.canvas.height = this.window_data.height * this.pixel_ratio;
 
-        this.canvas.style.width = this.windowData.width + 'px';
-        this.canvas.style.height = this.windowData.height + 'px';
+        this.canvas.style.width = this.window_data.width + 'px';
+        this.canvas.style.height = this.window_data.height + 'px';
 
-        this.ctx.scale( this.pixelRatio, this.pixelRatio );
+        this.ctx.scale( this.pixel_ratio, this.pixel_ratio );
     },
 
     onMouseMove() {
@@ -46,12 +45,10 @@ export default Object.assign( Object.create( BaseObject ), {
 
     draw() {
 
-        if ( !this.invalidated ) { return; }
-
         this.ctx.fillStyle = "rgb(12, 227, 185)";
         this.ctx.fillRect(
-            this.mouseData.x - 5,
-            this.mouseData.y - 5,
+            this.mouse_data.x - 5,
+            this.mouse_data.y - 5,
             10,
             10
         );

@@ -1,0 +1,27 @@
+// Override
+// --------
+
+.root {
+
+    // Override inline style to prevent flash of no styling
+    visibility: visible !important;
+
+}
+
+// Viewport
+// --------
+
+html {
+
+    overflow-y: scroll;
+    height: auto;
+
+}
+
+// Hide scrollbars for webkit browsers
+// * ::-webkit-scrollbar { display: none; }
+
+// Style scrollbars for webkit browsers
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: #fff; }
+::-webkit-scrollbar-thumb { background: #333; }

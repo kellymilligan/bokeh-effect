@@ -1,11 +1,11 @@
 import { _, $, BaseObject } from '../../common';
 
-export default Object.assign( Object.create( BaseObject ), {
+export default _.assign( _.create( BaseObject ), {
 
 
     setup(options) {
 
-        console.log( options.localConfig );
+        console.log( options.local_config );
     },
 
     onResize() {

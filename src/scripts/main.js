@@ -3,6 +3,8 @@ import HomePage from './pages/home_page';
 
 import detect_ie from './utils/dom/detect_ie';
 
+import clamp from './utils/math/clamp';
+
 export default function () {
 
 
@@ -11,10 +13,12 @@ export default function () {
 
     const IE = detect_ie();
 
-    let appConfig, windowData, mouseData, ui;
+    const TIME_START = Date.now();
 
-    let pages, trickleList;
-    let trickleLength = 0;
+    let app_config, window_data, mouse_data, gyro_data;
+    let ui;
+    let pages;
+    let flow_list, flow_length = 0;
 
     start();
 
@@ -26,13 +30,13 @@ export default function () {
 
         ui = {
 
-            window   : $(window),
-            document : $(document),
-            html     : $(document.documentElement),
-            root     : $('.js-root')
+            window   : $( window ),
+            document : $( document ),
+            html     : $( document.documentElement ),
+            root     : $( '.js-root' )
         };
 
-        appConfig = {
+        app_config = {
 
             IS_MOBILE: window.innerWidth <= MAX_WIDTH_MOBILE,
             IS_IOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
@@ -43,29 +47,54 @@ export default function () {
             IS_IE10_OR_BELOW: IE.flag && IE.version === "<=10"
         };
 
-        windowData = {
+        window_data = {
 
             width: 0,
             height: 0,
+
             ratio: 0,
             scale: 0,
-            time: 0
+
+            doc_height: 0,
+            scroll: 0,
+
+            time: 0,
+            time_elapsed: 0
         };
 
-        mouseData = {
+        mouse_data = {
 
             x: 0,
             y: 0,
-            nX: 0,
-            nY: 0
+
+            n_x: 0,
+            n_y: 0
+        };
+
+        gyro_data = {
+
+            available: false,
+
+            // raw
+            a: 0,
+            b: 0,
+            g: 0,
+
+            // starting
+            s_a: 0,
+            s_b: 0,
+            s_g: 0,
+
+            // normalised
+            n_a: 0,
+            n_b: 0,
+            n_g: 0
         };
 
         // Set up children
-        trickleList = [];
-
+        flow_list = [];
         createPages();
-
-        trickleLength = trickleList.length;
+        flow_length = flow_list.length;
 
         // Bind events
         addEvents();
@@ -81,22 +110,52 @@ export default function () {
 
         pages = {
 
-            home: Object.create( HomePage )
+            home: createPage( HomePage, ui.root.find( '.js-home' ) ),
         };
-
-        pages.home.init({ 'node': ui.root.find('.js-home'), 'appConfig': appConfig, 'windowData': windowData, 'mouseData': mouseData });
-
-        _.each( pages, (page) => trickleList.push( page ) );
     }
 
     function addEvents() {
 
         ui.window.on( 'load', onLoad );
         ui.window.on( 'resize', onResize );
+        ui.window.on( 'scroll', onScroll );
 
         ui.document.on( 'mousemove', onMouseMove );
         ui.document.on( 'touchstart', onTouchStart );
         ui.document.on( 'touchmove', onTouchMove );
+
+        ui.window.on( 'deviceorientation', onDeviceOrientation );
+    }
+
+
+    // Helpers
+    // -------
+
+    function createPage(PageObject, node = null, options = {}) {
+
+        let page = _.create( PageObject );
+
+        page.init({
+
+            app_config: app_config,
+            window_data: window_data,
+            mouse_data: mouse_data,
+            gyro_data: gyro_data,
+            node: node,
+            local_config: options
+        });
+
+        flow_list.push( page );
+
+        return page;
+    }
+
+    function flow(name) {
+
+        for ( var i = 0; i < flow_length; i++ ) {
+
+            flow_list[ i ][ name ]( arguments );
+        }
     }
 
 
@@ -109,62 +168,88 @@ export default function () {
 
     function onResize() {
 
-        windowData.width = ui.window.width();
-        windowData.height = ui.window.height();
-        windowData.ratio = windowData.width / windowData.height;
-        windowData.scale = windowData.width / BASE_WIDTH;
+        // Dimensions
+        window_data.width = ui.window.width();
+        window_data.height = ui.window.height();
+        window_data.ratio = window_data.width / window_data.height;
+        window_data.doc_height = ui.document.height();
 
-        ui.html[0].style.fontSize = 10 * windowData.scale + 'px';
+        // Scale
+        window_data.scale = window_data.width / BASE_WIDTH;
+        ui.html[0].style.fontSize = 10 * window_data.scale + 'px';
 
-        trickle( 'resize' );
+        // State
+        app_config.IS_MOBILE = window_data.width <= MAX_WIDTH_MOBILE;
+
+        flow( 'resize' );
+    }
+
+    function onScroll() {
+
+        window_data.scroll = window_data.scroll_top / ( window_data.doc_height - window_data.height );
+
+        flow( 'scroll' );
     }
 
     function onMouseMove(e) {
 
-        mouseData.x = e.clientX;
-        mouseData.y = e.clientY;
+        mouse_data.x = e.clientX;
+        mouse_data.y = e.clientY;
 
-        mouseData.nX = ( mouseData.x / windowData.width ) * 2 - 1;
-        mouseData.nY = ( mouseData.y / windowData.height ) * 2 - 1;
+        mouse_data.n_x = ( mouse_data.x / window_data.width ) * 2 - 1;
+        mouse_data.n_y = ( mouse_data.y / window_data.height ) * 2 - 1;
 
-        trickle( 'mouseMove' );
+        flow( 'mouseMove' );
     }
 
     function onTouchStart(e) {
 
-        e.clientX = e.touches[0].clientX;
-        e.clientY = e.touches[0].clientY;
+        e.clientX = e.touches[ 0 ].clientX;
+        e.clientY = e.touches[ 0 ].clientY;
 
         onMouseMove( e );
     }
 
     function onTouchMove(e) {
 
-        e.clientX = e.touches[0].clientX;
-        e.clientY = e.touches[0].clientY;
+        e.clientX = e.touches[ 0 ].clientX;
+        e.clientY = e.touches[ 0 ].clientY;
 
         onMouseMove( e );
     }
 
-    function onAnimFrame(t) {
+    function onDeviceOrientation(e) {
 
-        windowData.time = Date.now();
+        // Initial state
+        if ( !gyro_data.available && e.alpha && e.beta && e.gamma ) {
 
-        trickle( 'animFrame' );
+            gyro_data.available = true;
+            gyro_data.s_a = e.alpha;
+            gyro_data.s_b = e.beta;
+            gyro_data.s_g = e.gamma;
+        }
 
-        window.requestAnimationFrame( onAnimFrame );
+        // Raw values
+        gyro_data.a = e.alpha;
+        gyro_data.b = e.beta;
+        gyro_data.g = e.gamma;
+
+        // Normalise and adjust for starting values
+        gyro_data.n_a = clamp( ( gyro_data.a - gyro_data.s_a ) / 90, -1, 1 );
+        gyro_data.n_b = clamp( ( gyro_data.b - gyro_data.s_b ) / 90, -1, 1 );
+        gyro_data.n_g = clamp( ( gyro_data.g - gyro_data.s_g ) / 90, -1, 1 );
+
+        flow( 'accelChange' );
     }
 
+    function onAnimFrame(t) {
 
-    // Trickle
-    // -------
+        window_data.time = Date.now();
+        window_data.time_elapsed = window_data.time - TIME_START;
 
-    function trickle(name) {
+        flow( 'animFrame' );
 
-        for ( var i = 0; i < trickleLength; i++ ) {
-
-            trickleList[ i ][ name ]( arguments );
-        }
+        window.requestAnimationFrame( onAnimFrame );
     }
 
 }

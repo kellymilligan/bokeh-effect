@@ -2,7 +2,7 @@ import { _, $, BaseObject } from '../../common';
 
 import * as THREE from 'three';
 
-export default Object.assign( Object.create( BaseObject ), {
+export default _.assign( _.create( BaseObject ), {
 
 
     renderer: null,
@@ -18,12 +18,12 @@ export default Object.assign( Object.create( BaseObject ), {
     setup() {
 
         this.renderer = new THREE.WebGLRenderer({ antialias: true });
-        this.renderer.setSize( this.windowData.width, this.windowData.height );
-        this.renderer.setClearColor( 'rgb(37, 26, 48)', 1 );
+        this.renderer.setSize( this.window_data.width, this.window_data.height );
+        this.renderer.setClearColor( '#000', 1 );
 
         this.scene = new THREE.Scene();
 
-        this.camera = new THREE.PerspectiveCamera( 75, this.windowData.width / this.windowData.height, 1, 1000 );
+        this.camera = new THREE.PerspectiveCamera( 75, this.window_data.width / this.window_data.height, 1, 1000 );
         this.camera.position.z = 100;
 
         this.node.append( this.renderer.domElement );
@@ -42,7 +42,7 @@ export default Object.assign( Object.create( BaseObject ), {
             'wireframe': true
         });
 
-        this.mesh = new THREE.Mesh( new THREE.SphereGeometry( 10, 32, 32 ), this.material );
+        this.mesh = new THREE.Mesh( new THREE.SphereGeometry( 20, 32, 32 ), this.material );
 
         this.origin = new THREE.Object3D();
 
@@ -52,11 +52,11 @@ export default Object.assign( Object.create( BaseObject ), {
 
     onResize() {
 
-        this.camera.aspect = this.windowData.ratio;
+        this.camera.aspect = this.window_data.ratio;
         this.camera.updateProjectionMatrix();
 
         this.renderer.setPixelRatio( window.devicePixelRatio );
-        this.renderer.setSize( this.windowData.width, this.windowData.height );
+        this.renderer.setSize( this.window_data.width, this.window_data.height );
     },
 
     onMouseMove() {
@@ -64,6 +64,8 @@ export default Object.assign( Object.create( BaseObject ), {
     },
 
     onAnimFrame() {
+
+        this.origin.rotation.y += 0.001;
 
         this.render();
     },

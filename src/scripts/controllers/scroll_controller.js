@@ -147,4 +147,4 @@ class ScrollController {
 }
 
 let instance = new ScrollController();
-export default function () { return instance };
+export default function () { return instance; };

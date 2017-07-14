@@ -58,12 +58,12 @@ export function getResultMatrix(matrices) {
     return result;
 }
 
-export function getTransformString(m, numDecimals = 5) {
+export function getTransformString(m, num_decimals = 5) {
 
     return 'matrix3d(' +
-        m[0].toFixed( numDecimals ) + ',' + m[1].toFixed( numDecimals ) + ',' + m[2].toFixed( numDecimals ) + ',' + m[3].toFixed( numDecimals ) + ',' +
-        m[4].toFixed( numDecimals ) + ',' + m[5].toFixed( numDecimals ) + ',' + m[6].toFixed( numDecimals ) + ',' + m[7].toFixed( numDecimals ) + ',' +
-        m[8].toFixed( numDecimals ) + ',' + m[9].toFixed( numDecimals ) + ',' + m[10].toFixed( numDecimals ) + ',' + m[11].toFixed( numDecimals ) + ',' +
-        m[12].toFixed( numDecimals ) + ',' + m[13].toFixed( numDecimals ) + ',' + m[14].toFixed( numDecimals ) + ',' + m[15].toFixed( numDecimals ) +
+        m[ 0 ].toFixed( num_decimals ) + ',' + m[ 1 ].toFixed( num_decimals ) + ',' + m[ 2 ].toFixed( num_decimals ) + ',' + m[ 3 ].toFixed( num_decimals ) + ',' +
+        m[ 4 ].toFixed( num_decimals ) + ',' + m[ 5 ].toFixed( num_decimals ) + ',' + m[ 6 ].toFixed( num_decimals ) + ',' + m[ 7 ].toFixed( num_decimals ) + ',' +
+        m[ 8 ].toFixed( num_decimals ) + ',' + m[ 9 ].toFixed( num_decimals ) + ',' + m[ 10 ].toFixed( num_decimals ) + ',' + m[ 11 ].toFixed( num_decimals ) + ',' +
+        m[ 12 ].toFixed( num_decimals ) + ',' + m[ 13 ].toFixed( num_decimals ) + ',' + m[ 14 ].toFixed( num_decimals ) + ',' + m[ 15 ].toFixed( num_decimals ) +
     ')';
 }

@@ -5,7 +5,7 @@ import TweenMax from 'gsap';
 import * as matrixHelpers from '../../utils/dom/matrix_helpers';
 import applyCssTransform from '../../utils/dom/apply_css_transform';
 
-export default Object.assign( Object.create( BaseObject ), {
+export default _.assign( _.create( BaseObject ), {
 
 
     active: false,
@@ -53,16 +53,16 @@ export default Object.assign( Object.create( BaseObject ), {
 
     draw() {
 
-        let time = this.windowData.time;
+        let time = this.window_data.time;
 
-        let rotateZ = Math.sin( time * 0.0015 );
+        let rotate_z = Math.sin( time * 0.0015 );
 
-        let rotateZMatrix = matrixHelpers.getRotationZMatrix( rotateZ );
-        let resultMatrix = matrixHelpers.getResultMatrix( [ rotateZMatrix ] );
+        let rotate_z_matrix = matrixHelpers.getRotationZMatrix( rotate_z );
+        let result_matrix = matrixHelpers.getResultMatrix( [ rotate_z_matrix ] );
 
-        let matrixString = matrixHelpers.getTransformString( resultMatrix );
+        let matrix_string = matrixHelpers.getTransformString( result_matrix );
 
-        applyCssTransform( this.child, matrixString );
+        applyCssTransform( this.child, matrix_string );
     }
 
 });
