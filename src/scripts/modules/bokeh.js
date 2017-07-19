@@ -1,5 +1,9 @@
 import { _, $, BaseObject } from '../common';
 
+import { TWO_PI, PI, HALF_PI } from '../utils/math/constants';
+import * as Easing from '../utils/math/easing';
+import drawPolygon from '../utils/canvas/draw_polygon';
+
 export default _.assign( _.create( BaseObject ), {
 
 
@@ -40,18 +44,55 @@ export default _.assign( _.create( BaseObject ), {
 
     onAnimFrame() {
 
-        this.draw();
+        this.draw( this.ctx );
     },
 
-    draw() {
+    draw(ctx) {
 
-        this.ctx.fillStyle = "rgb(12, 227, 185)";
-        this.ctx.fillRect(
-            this.mouse_data.x - 5,
-            this.mouse_data.y - 5,
-            10,
-            10
-        );
+        // ctx.clearRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+
+        ctx.save();
+        {
+
+            ctx.globalAlpha = 0.33;
+            ctx.globalCompositeOperation = 'multiply';
+            ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+
+        }
+        ctx.restore();
+
+        ctx.save();
+        {
+
+            // ctx.globalAlpha = 0.01;
+            ctx.globalCompositeOperation = 'lighter';
+            // ctx.fillStyle = "rgb(12, 227, 185)";
+            ctx.fillStyle = "rgb(255, 0, 0)";
+
+            let radius_min = 90;
+            let radius_max = 100;
+            let count = 20;
+
+            ctx.globalAlpha = 1 / count;
+
+            for ( let i = 0; i < count; i++ ) {
+
+                let pos = Easing.easeOutCubic( i / count );
+
+                drawPolygon(
+                    ctx,
+                    this.mouse_data.x,
+                    this.mouse_data.y,
+                    radius_min + ( radius_max - radius_min ) * pos,
+                    9,
+                    ( TWO_PI * ( this.window_data.time + pos * 15000 ) * 0.00002 ) % TWO_PI
+                );
+
+                ctx.fill();
+            }
+
+        }
+        ctx.restore();
     }
 
 });
