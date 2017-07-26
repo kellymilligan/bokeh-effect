@@ -3,10 +3,11 @@ import { _, $, BaseObject } from '../common';
 import { TWO_PI, PI, HALF_PI } from '../utils/math/constants';
 import * as Easing from '../utils/math/easing';
 import drawPolygon from '../utils/canvas/draw_polygon';
+import drawCircle from '../utils/canvas/draw_circle';
 import simpleEase from '../utils/math/simple_ease';
 import distance from '../utils/math/distance_2d';
 
-const INSTANCES = 1000;
+const INSTANCES = 100;
 const COLOURS = [
     '#f00',
     '#00f',
@@ -122,7 +123,8 @@ export default _.assign( _.create( BaseObject ), {
 
     calc(time) {
 
-        this.cursor_speed += 0.05 * distance( this.mouse_data.n_x, this.mouse_data.n_y, this.cursor_prev_x, this.cursor_prev_y );
+        this.cursor_speed += 0.03 * distance( this.mouse_data.n_x, this.mouse_data.n_y, this.cursor_prev_x, this.cursor_prev_y );
+        this.cursor_speed = Math.min( this.cursor_speed, 0.2 );
         this.cursor_prev_x = this.mouse_data.n_x;
         this.cursor_prev_y = this.mouse_data.n_y;
 
@@ -153,7 +155,7 @@ export default _.assign( _.create( BaseObject ), {
         ctx.save();
         {
 
-            ctx.globalAlpha = 0.33;
+            ctx.globalAlpha = 0.3;
             ctx.globalCompositeOperation = 'multiply';
             ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
 
@@ -178,94 +180,54 @@ export default _.assign( _.create( BaseObject ), {
 
     drawBokeh(ctx, instance, time) {
 
-        let radius_min = 92 * instance.scale;
-        let radius_max = 100 * instance.scale;
-        let count = 1;//20;
-        let alpha_step = 1 / count;
+        let offset = 50;
+        let radius = 100;
 
         ctx.save();
         {
 
+            let x = instance.x * ( ctx.canvas.width * 0.5 );
+            let y = instance.y * ( ctx.canvas.height * 0.5 );
+
             ctx.globalCompositeOperation = 'lighter';
-            ctx.fillStyle = instance.colour;
+            // ctx.fillStyle = instance.colour;
 
-            for ( let i = 0; i < count; i++ ) {
+            let gradient = ctx.createRadialGradient(
+                x + offset * instance.x,
+                y + offset * instance.y,
+                radius * 1.1,
+                x,
+                y,
+                0
+            );
+            gradient.addColorStop( 0, '#000' );
+            gradient.addColorStop( 0.25, instance.colour );
+            gradient.addColorStop( 1, instance.colour );
 
-                let pos = Easing.easeOutCubic( i / count );
+            ctx.fillStyle = gradient;
 
-                drawPolygon(
-                    ctx,
-                    instance.x * ( ctx.canvas.width * 0.5 ),
-                    instance.y * ( ctx.canvas.height * 0.5 ),
-                    radius_min + ( radius_max - radius_min ) * pos,
-                    10,
-                    instance.rot * TWO_PI * 0.1 + ( pos * PI * 0.1 )
-                );
 
-                ctx.globalAlpha = this.cursor_speed * instance.alpha * alpha_step;
-                ctx.fill();
-            }
+            // drawPolygon(
+            //     ctx,
+            //     instance.x * ( ctx.canvas.width * 0.5 ),
+            //     instance.y * ( ctx.canvas.height * 0.5 ),
+            //     radius + ( radius_max - radius ) * pos,
+            //     9,
+            //     instance.rot * TWO_PI * 0.1 + ( pos * PI * 0.1 )
+            // );
+
+            drawCircle(
+                ctx,
+                x,
+                y,
+                radius
+            );
+
+            ctx.globalAlpha = this.cursor_speed * instance.alpha * 0.98 + 0.02 * Math.random();
+            ctx.fill();
 
         }
         ctx.restore();
     }
-
-     // drawBokeh(ctx, comp_ctx, instance, time) {
-
-    //     let radius_min = 80 * instance.scale;
-    //     let radius_max = 100 * instance.scale;
-    //     let count = 10;//20;
-    //     let alpha_step = 1 / count;
-
-    //     comp_ctx.clearRect( 0, 0, comp_ctx.canvas.width, comp_ctx.canvas.height );
-
-    //     comp_ctx.save();
-    //     {
-
-    //         comp_ctx.globalCompositeOperation = 'screen';
-    //         comp_ctx.fillStyle = instance.colour;
-
-    //         comp_ctx.translate( comp_ctx.canvas.width * 0.5, comp_ctx.canvas.height * 0.5 );
-
-    //         for ( let i = 0; i < count; i++ ) {
-
-    //             let pos = Easing.easeOutCubic( i / count );
-
-    //             drawPolygon(
-    //                 comp_ctx,
-    //                 0,
-    //                 0,
-    //                 radius_min + ( radius_max - radius_min ) * pos,
-    //                 10,
-    //                 instance.rot * ( PI + ( pos * PI ) ) * 0.1
-    //             );
-
-    //             comp_ctx.globalAlpha = alpha_step;
-    //         }
-    //             comp_ctx.fill();
-
-    //     }
-    //     comp_ctx.restore();
-
-    //     ctx.save();
-    //     {
-
-    //         ctx.globalCompositeOperation = 'screen';
-    //         ctx.globalAlpha = instance.alpha;
-
-    //         let x = instance.x * ctx.canvas.width * 0.5;
-    //         let y = instance.y * ctx.canvas.height * 0.5;
-    //         let comp_half_w = comp_ctx.canvas.width * 0.5;
-    //         let comp_half_h = comp_ctx.canvas.height * 0.5;
-
-    //         ctx.drawImage(
-    //             comp_ctx.canvas,
-    //             x - comp_half_w,
-    //             y - comp_half_h
-    //         );
-
-    //     }
-    //     ctx.restore();
-    // }
 
 });
