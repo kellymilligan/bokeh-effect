@@ -6,15 +6,37 @@ import drawPolygon from '../utils/canvas/draw_polygon';
 import drawCircle from '../utils/canvas/draw_circle';
 import simpleEase from '../utils/math/simple_ease';
 import distance from '../utils/math/distance_2d';
+import clamp from '../utils/math/clamp';
 
 const INSTANCES = 100;
 const COLOURS = [
-    '#f00',
-    '#00f',
-    '#0f0',
-    '#ff0',
-    '#f0f',
-    '#0ff'
+    // '#f00',
+    // '#00f',
+    // '#0f0',
+    // '#ff0',
+    // '#f0f',
+    // '#0ff'
+
+    '#fcfaf4', // white
+    '#f9f3db', // white
+    '#f8eec8', // white
+    '#f5dea2', // white
+
+    '#fccd4a', // yellow
+    '#ffc113', // yellow
+    '#0f4aaa', // blue
+    '#407fbd', // blue
+
+    '#3b895f', // green
+    '#ffc113', // cyan
+    '#ff4c00', // orange
+    '#f86b2f', // orange
+
+    '#f01f1f', // red
+    '#f01f5a', // red
+    '#ff002a', // red
+    '#ed1111', // red
+
 ];
 
 export default _.assign( _.create( BaseObject ), {
@@ -79,7 +101,7 @@ export default _.assign( _.create( BaseObject ), {
                 rot_target: 0,
                 rot: 0,
 
-                scale: 0.8 + Math.random() * 0.2,
+                scale: 0.9 + Math.random() * 0.2,
 
                 alpha: 1,
 
@@ -123,27 +145,28 @@ export default _.assign( _.create( BaseObject ), {
 
     calc(time) {
 
-        this.cursor_speed += 0.03 * distance( this.mouse_data.n_x, this.mouse_data.n_y, this.cursor_prev_x, this.cursor_prev_y );
-        this.cursor_speed = Math.min( this.cursor_speed, 0.2 );
+        this.cursor_speed += 0.05 * distance( this.mouse_data.n_x, this.mouse_data.n_y, this.cursor_prev_x, this.cursor_prev_y );
+        this.cursor_speed = Math.min( this.cursor_speed, 0.15 );
         this.cursor_prev_x = this.mouse_data.n_x;
         this.cursor_prev_y = this.mouse_data.n_y;
 
-        this.cursor_speed *= 0.97;
+        this.cursor_speed *= 0.98;
 
         // Update isntances
         for ( let i = 0; i < this.instance_count; i++ ) {
 
             let instance = this.instances[ i ];
+            let magnitude = 0.5;
 
-            instance.x_target = instance.x_start + 0.5 * this.mouse_data.n_x * ( 0.5 + Math.abs( instance.x_start ) * 0.5 );
-            instance.y_target = instance.y_start + 0.5 * this.mouse_data.n_y * ( 0.5 + Math.abs( instance.y_start ) * 0.5 );
+            instance.x_target = instance.x_start + magnitude * this.mouse_data.n_x * ( 0.3 + 0.7 * Math.abs( instance.x_start ) );
+            instance.y_target = instance.y_start + ( magnitude / this.window_data.ratio ) * this.mouse_data.n_y * ( 0.5 + Math.abs( instance.y_start ) * 0.5 );
 
-            instance.rot_target = this.mouse_data.n_x * ( 0.5 + Math.abs( instance.y_start ) * 0.5 ) * instance.scale;
+            // instance.rot_target = this.mouse_data.n_x * ( 0.5 + Math.abs( instance.y_start ) * 0.5 ) * instance.scale;
 
             instance.x = simpleEase( instance.x, instance.x_target, 0.02, true );
             instance.y = simpleEase( instance.y, instance.y_target, 0.02, true );
 
-            instance.rot = simpleEase( instance.rot, instance.rot_target, 0.01, true );
+            // instance.rot = simpleEase( instance.rot, instance.rot_target, 0.01, true );
 
             instance.alpha = Math.max( 1 - distance( instance.x, instance.y, instance.x_start, instance.y_start ) * 2, 0 );
         }
@@ -156,6 +179,7 @@ export default _.assign( _.create( BaseObject ), {
         {
 
             ctx.globalAlpha = 0.3;
+            // ctx.fillStyle = '#201026';
             ctx.globalCompositeOperation = 'multiply';
             ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
 
@@ -181,7 +205,7 @@ export default _.assign( _.create( BaseObject ), {
     drawBokeh(ctx, instance, time) {
 
         let offset = 50;
-        let radius = 100;
+        let radius = 100 * ( instance.scale + clamp( Math.abs( instance.x ), 0, 1 ) * -0.15 );
 
         ctx.save();
         {
@@ -189,8 +213,9 @@ export default _.assign( _.create( BaseObject ), {
             let x = instance.x * ( ctx.canvas.width * 0.5 );
             let y = instance.y * ( ctx.canvas.height * 0.5 );
 
+            let sharpness = clamp( ( Math.abs( instance.x ) + Math.abs( instance.y ) ) / 2, 0, 1 );
+
             ctx.globalCompositeOperation = 'lighter';
-            // ctx.fillStyle = instance.colour;
 
             let gradient = ctx.createRadialGradient(
                 x + offset * instance.x,
@@ -201,7 +226,7 @@ export default _.assign( _.create( BaseObject ), {
                 0
             );
             gradient.addColorStop( 0, '#000' );
-            gradient.addColorStop( 0.25, instance.colour );
+            gradient.addColorStop( 0.2 - 0.05 * sharpness, instance.colour );
             gradient.addColorStop( 1, instance.colour );
 
             ctx.fillStyle = gradient;
@@ -223,7 +248,7 @@ export default _.assign( _.create( BaseObject ), {
                 radius
             );
 
-            ctx.globalAlpha = this.cursor_speed * instance.alpha * 0.98 + 0.02 * Math.random();
+            ctx.globalAlpha = this.cursor_speed * instance.alpha * 0.985 + 0.015 * Math.random();
             ctx.fill();
 
         }
