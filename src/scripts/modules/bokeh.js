@@ -18,28 +18,48 @@ const MAX_INSTANCES = 150;
 const INSTANCES = clamp( Math.round( 100 * ( window.innerWidth / 1440 ) ), MIN_INSTANCES, MAX_INSTANCES );
 
 const COLOURS = [
-
-    '#fcfaf4', // white
-    '#f9f3db', // white
-    '#f8eec8', // white
-    '#f5dea2', // white
-
-    '#fccd4a', // yellow
-    '#ffc113', // yellow
-    '#0f4aaa', // blue
-    '#407fbd', // blue
-
-    '#3b895f', // green
-    '#ffc113', // cyan
-    '#ff4c00', // orange
-    '#f86b2f', // orange
-
-    '#f01f1f', // red
-    '#f01f5a', // red
-    '#ff002a', // red
-    '#ed1111', // red
-
+    // RED
+    {
+        ratio: 0.8,
+        pool: [
+            '#f01f1f',
+            '#f01f5a',
+            '#ff002a',
+            '#ed1111',
+        ]
+    },
+    // YELLOW
+    {
+        ratio: 0.85,
+        pool: [
+            '#fccd4a',
+            '#ffc113',
+        ]
+    },
+    // WHITE
+    {
+        ratio: 0.95,
+        pool: [
+            '#fcfaf4',
+            '#f9f3db',
+            '#f8eec8',
+            '#f5dea2',
+        ]
+    },
+    // OTHER
+    {
+        ratio: 1.0,
+        pool: [
+            '#ff4c00', // orange
+            '#f86b2f', // orange
+            '#0f4aaa', // blue
+            '#407fbd', // blue
+            '#3b895f', // green
+            '#ffc113', // cyan
+        ]
+    }
 ];
+
 
 export default _.assign( _.create( BaseObject ), {
 
@@ -128,7 +148,7 @@ export default _.assign( _.create( BaseObject ), {
 
                 alpha: 1,
 
-                colour: COLOURS[ Math.floor( Math.random() * COLOURS.length ) ]
+                colour: this.getColour( COLOURS )
             };
 
             this.instances.push( instance );
@@ -199,7 +219,7 @@ export default _.assign( _.create( BaseObject ), {
         for ( let i = 0; i < this.instance_count; i++ ) {
 
             let instance = this.instances[ i ];
-            let magnitude = 0.2;
+            let magnitude = 0.25;
 
             let interactive_x = instance.x_start + magnitude * this.mouse_data.n_x * ( 0.3 + 0.7 * Math.abs( instance.x_start ) );
             let interactive_y = instance.y_start + ( magnitude / this.window_data.ratio ) * this.mouse_data.n_y * ( 0.5 + Math.abs( instance.y_start ) * 0.5 );
@@ -250,6 +270,8 @@ export default _.assign( _.create( BaseObject ), {
 
         }
         ctx.restore();
+
+        this.drawFader( ctx );
     },
 
     drawBokeh(ctx, instance, time) {
@@ -259,7 +281,7 @@ export default _.assign( _.create( BaseObject ), {
             // Scale to x position
             + clamp( Math.abs( instance.x ), 0, 1 ) * -0.15
             // Scale to x position and sequence alpha
-            + ( 1 - this.sequence_alpha ) * 0.8 * Math.abs( instance.x ) );
+            + ( 1 - this.sequence_alpha ) * 0.6 * Math.abs( instance.x ) );
 
         ctx.save();
         {
@@ -310,6 +332,48 @@ export default _.assign( _.create( BaseObject ), {
 
         }
         ctx.restore();
+    },
+
+    drawFader( ctx ) {
+
+        // This fade helps to round off the residual trails from the multiply composite above.
+        // Using this we can fade to a full #000 black at the very end.
+
+        const FADE_RANGE = 0.2;
+
+        if ( this.sequence_progress > ( 1 - FADE_RANGE ) ) {
+
+            ctx.save();
+            {
+
+                ctx.fillStyle = 'black';
+                ctx.globalCompositeOperation = 'darken';
+                ctx.globalAlpha = Easing.easeInCubic( Math.max( this.sequence_progress - ( 1 - FADE_RANGE ), 0 ) / FADE_RANGE );
+                ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
+
+            }
+            ctx.restore();
+        }
+    },
+
+
+    // Helpers
+    // -------
+
+    getColour(palette) {
+
+        let pool_selector = Math.random();
+        let pool_ratio = 0;
+
+        for ( let i = 0; i < palette.length; i++ ) {
+
+            let group = palette[ i ];
+
+            if ( pool_selector <= group.ratio ) {
+
+                return group.pool[ Math.floor( Math.random() * group.pool.length ) ];
+            }
+        }
     }
 
 });
