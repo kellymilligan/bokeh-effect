@@ -1,21 +1,16 @@
 import { _, $, BaseObject } from '../common';
 
 import { TWO_PI, PI, HALF_PI } from '../utils/math/constants';
-import * as Easing from '../utils/math/easing';
-import drawPolygon from '../utils/canvas/draw_polygon';
+// import * as Easing from '../utils/math/easing';
 import drawCircle from '../utils/canvas/draw_circle';
 import simpleEase from '../utils/math/simple_ease';
 import distance from '../utils/math/distance_2d';
 import clamp from '../utils/math/clamp';
 
+import LOGO_BASE64 from './logo';
+
 const INSTANCES = 100;
 const COLOURS = [
-    // '#f00',
-    // '#00f',
-    // '#0f0',
-    // '#ff0',
-    // '#f0f',
-    // '#0ff'
 
     '#fcfaf4', // white
     '#f9f3db', // white
@@ -42,20 +37,24 @@ const COLOURS = [
 export default _.assign( _.create( BaseObject ), {
 
 
-    canvas      : null,
-    ctx         : null,
-    comp_ctx    : null,
+    canvas: null,
+    ctx: null,
+    comp_ctx: null,
 
-    pixel_ratio : 1,
+    pixel_ratio: 1,
 
-    invalidated : false,
+    invalidated: false,
 
-    instances      : null,
-    instance_count : 0,
+    instances: null,
+    instance_count: 0,
 
-    cursor_speed   : 0,
-    cursor_prev_x  : 0,
-    cursor_prev_y  : 0,
+    cursor_speed: 0,
+    cursor_prev_x: 0,
+    cursor_prev_y: 0,
+
+    logo_image: null,
+    logo_width: 0,
+    logo_height: 0,
 
 
     setup() {
@@ -71,9 +70,20 @@ export default _.assign( _.create( BaseObject ), {
 
         this.node.append( this.canvas );
 
+        this.setupLogo();
         this.setupInstances();
 
         this.resize();
+    },
+
+    setupLogo() {
+
+        let SCALE = 0.25;
+
+        this.logo_image = document.createElement( 'img' );
+        this.logo_image.src = LOGO_BASE64;
+        this.logo_width = this.logo_image.naturalWidth * SCALE;
+        this.logo_height = this.logo_image.naturalHeight * SCALE;
     },
 
     setupInstances() {
@@ -186,17 +196,20 @@ export default _.assign( _.create( BaseObject ), {
         }
         ctx.restore();
 
-        // Bokeh flares
         ctx.save();
         {
 
             // set coordinate space to center
             ctx.translate( ctx.canvas.width * 0.5, ctx.canvas.height * 0.5 );
 
+            // Bokeh flares
             for ( let i = 0; i < this.instance_count; i++ ) {
 
                 this.drawBokeh( ctx, this.instances[ i ], time );
             }
+
+            // Hakkasan logo
+            this.drawLogo( ctx, time );
 
         }
         ctx.restore();
@@ -231,16 +244,6 @@ export default _.assign( _.create( BaseObject ), {
 
             ctx.fillStyle = gradient;
 
-
-            // drawPolygon(
-            //     ctx,
-            //     instance.x * ( ctx.canvas.width * 0.5 ),
-            //     instance.y * ( ctx.canvas.height * 0.5 ),
-            //     radius + ( radius_max - radius ) * pos,
-            //     9,
-            //     instance.rot * TWO_PI * 0.1 + ( pos * PI * 0.1 )
-            // );
-
             drawCircle(
                 ctx,
                 x,
@@ -253,6 +256,20 @@ export default _.assign( _.create( BaseObject ), {
 
         }
         ctx.restore();
+    },
+
+    drawLogo(ctx, time) {
+
+        ctx.save();
+        {
+
+            ctx.globalCompositeOperation = 'lighter';
+            ctx.globalAlpha = 0.25 * ( Math.sin( time * 0.001 ) * 0.5 + 0.5 );
+            ctx.drawImage( this.logo_image, this.logo_width * -0.5, this.logo_height * -0.5, this.logo_width, this.logo_height );
+
+        }
+        ctx.restore();
+
     }
 
 });
