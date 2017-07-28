@@ -1,7 +1,9 @@
-import { _, $, BaseObject } from '../common';
+import { BaseObject } from '../common';
+
+import Tween from '../utils/math/tween';
 
 import { TWO_PI, PI, HALF_PI } from '../utils/math/constants';
-// import * as Easing from '../utils/math/easing';
+import * as Easing from '../utils/math/easing';
 import drawCircle from '../utils/canvas/draw_circle';
 import simpleEase from '../utils/math/simple_ease';
 import distance from '../utils/math/distance_2d';
@@ -9,7 +11,12 @@ import clamp from '../utils/math/clamp';
 
 import LOGO_BASE64 from './logo';
 
-const INSTANCES = 100;
+const MIN_INSTANCES = 30;
+const MAX_INSTANCES = 150;
+
+// Add more instances the wider the screen is, based on 100 at 1440px wide
+const INSTANCES = clamp( Math.round( 100 * ( window.innerWidth / 1440 ) ), MIN_INSTANCES, MAX_INSTANCES );
+
 const COLOURS = [
 
     '#fcfaf4', // white
@@ -56,6 +63,13 @@ export default _.assign( _.create( BaseObject ), {
     logo_width: 0,
     logo_height: 0,
 
+    sequence_tween: null,
+    sequence_progress: 0,
+    sequence_alpha: 0,
+
+
+    // Setup
+    // -----
 
     setup() {
 
@@ -74,6 +88,8 @@ export default _.assign( _.create( BaseObject ), {
         this.setupInstances();
 
         this.resize();
+
+        this.runSequence();
     },
 
     setupLogo() {
@@ -102,14 +118,11 @@ export default _.assign( _.create( BaseObject ), {
                 x_start: x_start,
                 y_start: y_start,
 
-                x_target: x_start,
-                y_target: y_start,
+                x_target: x_start - 0.15,
+                y_target: y_start - 0.15,
 
-                x: x_start,
-                y: y_start,
-
-                rot_target: 0,
-                rot: 0,
+                x: x_start - 0.15,
+                y: y_start - 0.15,
 
                 scale: 0.9 + Math.random() * 0.2,
 
@@ -123,6 +136,23 @@ export default _.assign( _.create( BaseObject ), {
 
         this.instance_count = this.instances.length;
     },
+
+
+    // Sequencing
+    // ----------
+
+    runSequence() {
+
+        this.sequence_tween = new Tween(
+            6000,
+            'easeInOutCubic',
+            (value, progress) => { this.sequence_progress = progress; },
+            () => { this.sequence_tween = null; }
+        );
+
+        this.sequence_tween.start();
+    },
+
 
     // Handlers
     // --------
@@ -150,13 +180,16 @@ export default _.assign( _.create( BaseObject ), {
         this.draw( this.ctx, this.window_data.time );
     },
 
+
     // Animate
     // -------
 
     calc(time) {
 
+        this.sequence_alpha = Easing.easeOutCubic( 1 - Math.abs( this.sequence_progress * 2 - 1 ) );
+
         this.cursor_speed += 0.05 * distance( this.mouse_data.n_x, this.mouse_data.n_y, this.cursor_prev_x, this.cursor_prev_y );
-        this.cursor_speed = Math.min( this.cursor_speed, 0.15 );
+        this.cursor_speed = Math.min( this.cursor_speed, 0.12 );
         this.cursor_prev_x = this.mouse_data.n_x;
         this.cursor_prev_y = this.mouse_data.n_y;
 
@@ -166,17 +199,21 @@ export default _.assign( _.create( BaseObject ), {
         for ( let i = 0; i < this.instance_count; i++ ) {
 
             let instance = this.instances[ i ];
-            let magnitude = 0.5;
+            let magnitude = 0.2;
 
-            instance.x_target = instance.x_start + magnitude * this.mouse_data.n_x * ( 0.3 + 0.7 * Math.abs( instance.x_start ) );
-            instance.y_target = instance.y_start + ( magnitude / this.window_data.ratio ) * this.mouse_data.n_y * ( 0.5 + Math.abs( instance.y_start ) * 0.5 );
+            let interactive_x = instance.x_start + magnitude * this.mouse_data.n_x * ( 0.3 + 0.7 * Math.abs( instance.x_start ) );
+            let interactive_y = instance.y_start + ( magnitude / this.window_data.ratio ) * this.mouse_data.n_y * ( 0.5 + Math.abs( instance.y_start ) * 0.5 );
 
-            // instance.rot_target = this.mouse_data.n_x * ( 0.5 + Math.abs( instance.y_start ) * 0.5 ) * instance.scale;
+            let sequence_pos = this.sequence_progress * 2 - 1;
+
+            let sequence_x = Easing.easeOutQuart( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
+            let sequence_y = Easing.easeOutQuart( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
+
+            instance.x_target = interactive_x + sequence_x * 0.2;
+            instance.y_target = interactive_y + sequence_y * 0.2;
 
             instance.x = simpleEase( instance.x, instance.x_target, 0.02, true );
             instance.y = simpleEase( instance.y, instance.y_target, 0.02, true );
-
-            // instance.rot = simpleEase( instance.rot, instance.rot_target, 0.01, true );
 
             instance.alpha = Math.max( 1 - distance( instance.x, instance.y, instance.x_start, instance.y_start ) * 2, 0 );
         }
@@ -189,13 +226,13 @@ export default _.assign( _.create( BaseObject ), {
         {
 
             ctx.globalAlpha = 0.3;
-            // ctx.fillStyle = '#201026';
             ctx.globalCompositeOperation = 'multiply';
             ctx.fillRect( 0, 0, ctx.canvas.width, ctx.canvas.height );
 
         }
         ctx.restore();
 
+        // Artwork
         ctx.save();
         {
 
@@ -218,7 +255,11 @@ export default _.assign( _.create( BaseObject ), {
     drawBokeh(ctx, instance, time) {
 
         let offset = 50;
-        let radius = 100 * ( instance.scale + clamp( Math.abs( instance.x ), 0, 1 ) * -0.15 );
+        let radius = 100 * ( instance.scale
+            // Scale to x position
+            + clamp( Math.abs( instance.x ), 0, 1 ) * -0.15
+            // Scale to x position and sequence alpha
+            + ( 1 - this.sequence_alpha ) * 0.8 * Math.abs( instance.x ) );
 
         ctx.save();
         {
@@ -251,7 +292,7 @@ export default _.assign( _.create( BaseObject ), {
                 radius
             );
 
-            ctx.globalAlpha = this.cursor_speed * instance.alpha * 0.985 + 0.015 * Math.random();
+            ctx.globalAlpha = this.sequence_alpha * ( ( this.cursor_speed + 0.07 * this.sequence_alpha ) * instance.alpha * 0.98 + 0.02 * Math.random() );
             ctx.fill();
 
         }
@@ -264,12 +305,11 @@ export default _.assign( _.create( BaseObject ), {
         {
 
             ctx.globalCompositeOperation = 'lighter';
-            ctx.globalAlpha = 0.25 * ( Math.sin( time * 0.001 ) * 0.5 + 0.5 );
+            ctx.globalAlpha = 0.25 * this.sequence_alpha;
             ctx.drawImage( this.logo_image, this.logo_width * -0.5, this.logo_height * -0.5, this.logo_width, this.logo_height );
 
         }
         ctx.restore();
-
     }
 
 });
