@@ -164,7 +164,7 @@ export default _.assign( _.create( BaseObject ), {
     runSequence() {
 
         this.sequence_tween = new Tween(
-            6000,
+            7000,
             'easeInOutCubic',
             (value, progress) => { this.sequence_progress = progress; },
             () => { this.sequence_tween = null; }
@@ -226,8 +226,8 @@ export default _.assign( _.create( BaseObject ), {
 
             let sequence_pos = this.sequence_progress * 2 - 1;
 
-            let sequence_x = Easing.easeOutQuart( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
-            let sequence_y = Easing.easeOutQuart( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
+            let sequence_x = Easing.easeOutSine( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
+            let sequence_y = Easing.easeOutSine( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
 
             instance.x_target = interactive_x + sequence_x * 0.2;
             instance.y_target = interactive_y + sequence_y * 0.2;

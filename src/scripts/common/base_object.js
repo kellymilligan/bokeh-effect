@@ -1,4 +1,4 @@
-import { _, $ } from '../common';
+import { _ } from '../common';
 
 export default {
 

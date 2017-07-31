@@ -1,5 +1,5 @@
-import { _, $ } from './common';
-import HomePage from './pages/home_page';
+import { _ } from './common';
+import Bokeh from './modules/bokeh.js';
 
 import detect_ie from './utils/dom/detect_ie';
 
@@ -30,10 +30,10 @@ export default function () {
 
         ui = {
 
-            window   : $( window ),
-            document : $( document ),
-            html     : $( document.documentElement ),
-            root     : $( '.js-root' )
+            window   : window,
+            document : document,
+            html     : document.documentElement,
+            root     : document.querySelector( '.js-root' )
         };
 
         app_config = {
@@ -110,21 +110,19 @@ export default function () {
 
         pages = {
 
-            home: createPage( HomePage, ui.root.find( '.js-home' ) ),
+            bokeh: createPage( Bokeh, ui.root.querySelector( '.js-bokeh' ) ),
         };
     }
 
     function addEvents() {
 
-        ui.window.on( 'load', onLoad );
-        ui.window.on( 'resize', onResize );
-        ui.window.on( 'scroll', onScroll );
+        ui.window.addEventListener( 'resize', onResize, false );
 
-        ui.document.on( 'mousemove', onMouseMove );
-        ui.document.on( 'touchstart', onTouchStart );
-        ui.document.on( 'touchmove', onTouchMove );
+        ui.document.addEventListener( 'mousemove', onMouseMove, false );
+        ui.document.addEventListener( 'touchstart', onTouchStart, false );
+        ui.document.addEventListener( 'touchmove', onTouchMove, false );
 
-        ui.window.on( 'deviceorientation', onDeviceOrientation );
+        ui.window.addEventListener( 'deviceorientation', onDeviceOrientation, false );
     }
 
 
@@ -162,33 +160,17 @@ export default function () {
     // Handlers
     // --------
 
-    function onLoad() {
-
-    }
-
     function onResize() {
 
         // Dimensions
-        window_data.width = ui.window.width();
-        window_data.height = ui.window.height();
+        window_data.width = ui.window.innerWidth;
+        window_data.height = ui.window.innerHeight;
         window_data.ratio = window_data.width / window_data.height;
-        window_data.doc_height = ui.document.height();
-
-        // Scale
-        window_data.scale = window_data.width / BASE_WIDTH;
-        ui.html[0].style.fontSize = 10 * window_data.scale + 'px';
 
         // State
         app_config.IS_MOBILE = window_data.width <= MAX_WIDTH_MOBILE;
 
         flow( 'resize' );
-    }
-
-    function onScroll() {
-
-        window_data.scroll = window_data.scroll_top / ( window_data.doc_height - window_data.height );
-
-        flow( 'scroll' );
     }
 
     function onMouseMove(e) {
