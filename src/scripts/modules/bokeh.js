@@ -11,7 +11,7 @@ import clamp from '../utils/math/clamp';
 
 import LOGO_BASE64 from './logo';
 
-const MIN_INSTANCES = 30;
+const MIN_INSTANCES = 20;
 const MAX_INSTANCES = 150;
 
 // Add more instances the wider the screen is, based on 100 at 1440px wide
@@ -79,6 +79,7 @@ export default _.assign( _.create( BaseObject ), {
     cursor_prev_x: 0,
     cursor_prev_y: 0,
 
+    logo_ready: false,
     logo_image: null,
     logo_width: 0,
     logo_height: 0,
@@ -109,7 +110,9 @@ export default _.assign( _.create( BaseObject ), {
 
         this.resize();
 
-        this.runSequence();
+        setTimeout( () => {
+            this.runSequence();
+        }, 500 );
     },
 
     setupLogo() {
@@ -118,8 +121,9 @@ export default _.assign( _.create( BaseObject ), {
 
         this.logo_image = document.createElement( 'img' );
         this.logo_image.src = LOGO_BASE64;
-        this.logo_width = this.logo_image.naturalWidth * SCALE;
-        this.logo_height = this.logo_image.naturalHeight * SCALE;
+        // Use fixed dimensions as naturalWidth/Height sometimes returning as zero
+        this.logo_width = 512 * SCALE; // this.logo_image.naturalWidth * SCALE;
+        this.logo_height = 481 * SCALE; // this.logo_image.naturalHeight * SCALE;
     },
 
     setupInstances() {
@@ -164,7 +168,7 @@ export default _.assign( _.create( BaseObject ), {
     runSequence() {
 
         this.sequence_tween = new Tween(
-            7000,
+            6000,
             'easeInOutCubic',
             (value, progress) => { this.sequence_progress = progress; },
             () => { this.sequence_tween = null; }
@@ -206,9 +210,11 @@ export default _.assign( _.create( BaseObject ), {
 
     calc(time) {
 
-        this.sequence_alpha = Easing.easeOutCubic( 1 - Math.abs( this.sequence_progress * 2 - 1 ) );
+        let sequence_pos = this.sequence_progress * 2 - 1;
 
-        this.cursor_speed += 0.05 * distance( this.mouse_data.n_x, this.mouse_data.n_y, this.cursor_prev_x, this.cursor_prev_y );
+        this.sequence_alpha = Easing.easeOutCubic( 1 - Math.abs( sequence_pos ) );
+
+        this.cursor_speed += 0.03 * distance( this.mouse_data.n_x, this.mouse_data.n_y, this.cursor_prev_x, this.cursor_prev_y );
         this.cursor_speed = Math.min( this.cursor_speed, 0.12 );
         this.cursor_prev_x = this.mouse_data.n_x;
         this.cursor_prev_y = this.mouse_data.n_y;
@@ -219,15 +225,16 @@ export default _.assign( _.create( BaseObject ), {
         for ( let i = 0; i < this.instance_count; i++ ) {
 
             let instance = this.instances[ i ];
-            let magnitude = 0.25;
+            let magnitude = this.gyro_data.available ? 0.3 : 0.15;
 
-            let interactive_x = instance.x_start + magnitude * this.mouse_data.n_x * ( 0.3 + 0.7 * Math.abs( instance.x_start ) );
-            let interactive_y = instance.y_start + ( magnitude / this.window_data.ratio ) * this.mouse_data.n_y * ( 0.5 + Math.abs( instance.y_start ) * 0.5 );
+            let input_x = this.gyro_data.available ? this.gyro_data.n_a : this.mouse_data.n_x;
+            let input_y = this.gyro_data.available ? this.gyro_data.n_b : this.mouse_data.n_y;
 
-            let sequence_pos = this.sequence_progress * 2 - 1;
+            let interactive_x = instance.x_start + magnitude * input_x * -1 * ( 0.3 + 0.7 * Math.abs( instance.x_start ) );
+            let interactive_y = instance.y_start + ( magnitude / this.window_data.ratio ) * input_y * ( 0.5 + Math.abs( instance.y_start ) * 0.5 );
 
-            let sequence_x = Easing.easeOutSine( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
-            let sequence_y = Easing.easeOutSine( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
+            let sequence_x = /*Easing.easeInOutSine*/( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
+            let sequence_y = /*Easing.easeInOutSine*/( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
 
             instance.x_target = interactive_x + sequence_x * 0.2;
             instance.y_target = interactive_y + sequence_y * 0.2;
