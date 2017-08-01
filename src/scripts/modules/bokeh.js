@@ -69,8 +69,6 @@ export default _.assign( _.create( BaseObject ), {
 
     pixel_ratio: 1,
 
-    invalidated: false,
-
     instances: null,
     instance_count: 0,
 
@@ -78,7 +76,6 @@ export default _.assign( _.create( BaseObject ), {
     cursor_prev_x: 0,
     cursor_prev_y: 0,
 
-    logo_ready: false,
     logo_image: null,
     logo_width: 0,
     logo_height: 0,
@@ -100,6 +97,12 @@ export default _.assign( _.create( BaseObject ), {
 
         this.setupLogo();
         this.setupInstances();
+
+        this.canvas.style.position = 'fixed';
+        this.canvas.style.left = 0;
+        this.canvas.style.top = 0;
+        this.canvas.style.width = '100%';
+        this.canvas.style.height = '100%';
 
         this.resize();
 
@@ -154,6 +157,14 @@ export default _.assign( _.create( BaseObject ), {
         this.instance_count = this.instances.length;
     },
 
+    destroy() {
+
+        this.instances = [];
+        this.logo_image = null;
+        this.ctx = null;
+        this.canvas = null;
+    },
+
 
     // Sequencing
     // ----------
@@ -164,7 +175,11 @@ export default _.assign( _.create( BaseObject ), {
             6000,
             'easeInOutCubic',
             (value, progress) => { this.sequence_progress = progress; },
-            () => { this.sequence_tween = null; }
+            () => {
+
+                this.sequence_tween = null;
+                this.parent_destroy();
+            }
         );
 
         this.sequence_tween.start();

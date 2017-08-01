@@ -17,8 +17,9 @@ export default function () {
 
     let app_config, window_data, mouse_data, gyro_data;
     let ui;
-    let pages;
     let flow_list, flow_length = 0;
+    let bokeh;
+    let raf;
 
     start();
 
@@ -33,18 +34,19 @@ export default function () {
             window   : window,
             document : document,
             html     : document.documentElement,
-            root     : document.querySelector( '.js-root' )
+            bokeh    : document.querySelector( '.js-bokeh' )
         };
 
         app_config = {
 
             IS_MOBILE: window.innerWidth <= MAX_WIDTH_MOBILE,
             IS_IOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
-            IS_SAFARI: navigator.userAgent.indexOf('Safari') != -1 && navigator.userAgent.indexOf('Chrome') == -1,
+            IS_SAFARI: navigator.userAgent.indexOf( 'Safari' ) != -1 && navigator.userAgent.indexOf( 'Chrome' ) == -1,
+            IS_FIREFOX: navigator.userAgent.toLowerCase().indexOf( 'firefox' ) > -1,
             IS_IE: IE.flag,
-            IS_IE_EDGE: IE.flag && IE.version === "Edge",
-            IS_IE_11: IE.flag && IE.version === "11",
-            IS_IE10_OR_BELOW: IE.flag && IE.version === "<=10"
+            IS_IE_EDGE: IE.flag && IE.version === 'Edge',
+            IS_IE_11: IE.flag && IE.version === '11',
+            IS_IE10_OR_BELOW: IE.flag && IE.version === '<=10'
         };
 
         window_data = {
@@ -93,7 +95,8 @@ export default function () {
 
         // Set up children
         flow_list = [];
-        createPages();
+        bokeh = createPage( Bokeh, ui.bokeh );
+        bokeh.parent_destroy = destroy;
         flow_length = flow_list.length;
 
         // Bind events
@@ -103,15 +106,7 @@ export default function () {
         onResize();
 
         // Start anim frame
-        _.defer( function () { window.requestAnimationFrame( onAnimFrame ); } );
-    }
-
-    function createPages() {
-
-        pages = {
-
-            bokeh: createPage( Bokeh, ui.root.querySelector( '.js-bokeh' ) ),
-        };
+        _.defer( function () { raf = window.requestAnimationFrame( onAnimFrame ); } );
     }
 
     function addEvents() {
@@ -123,6 +118,37 @@ export default function () {
         ui.document.addEventListener( 'touchmove', onTouchMove, false );
 
         ui.window.addEventListener( 'deviceorientation', onDeviceOrientation, false );
+    }
+
+    function removeEvents() {
+
+        ui.window.removeEventListener( 'resize', onResize, false );
+
+        ui.document.removeEventListener( 'mousemove', onMouseMove, false );
+        ui.document.removeEventListener( 'touchstart', onTouchStart, false );
+        ui.document.removeEventListener( 'touchmove', onTouchMove, false );
+
+        ui.window.removeEventListener( 'deviceorientation', onDeviceOrientation, false );
+    }
+
+    function destroy() {
+
+        window.cancelAnimationFrame( raf );
+        removeEvents();
+
+        _.defer( () => {
+
+            bokeh.destroy();
+            ui.bokeh.parentNode.removeChild( ui.bokeh );
+
+            app_config = null;
+            window_data = null;
+            mouse_data = null;
+            gyro_data = null;
+            ui = null;
+            flow_list = null;
+            bokeh = null;
+        } );
     }
 
 
@@ -231,7 +257,7 @@ export default function () {
 
         flow( 'animFrame' );
 
-        window.requestAnimationFrame( onAnimFrame );
+        raf = window.requestAnimationFrame( onAnimFrame );
     }
 
 }
