@@ -8,6 +8,7 @@ import drawCircle from '../utils/canvas/draw_circle';
 import simpleEase from '../utils/math/simple_ease';
 import distance from '../utils/math/distance_2d';
 import clamp from '../utils/math/clamp';
+import sign from '../utils/math/sign';
 
 import LOGO_BASE64 from './logo';
 
@@ -93,7 +94,7 @@ export default _.assign( _.create( BaseObject ), {
         this.canvas = document.createElement( 'canvas' );
         this.ctx = this.canvas.getContext( '2d' );
 
-        this.node.append( this.canvas );
+        this.node.appendChild( this.canvas );
 
         this.setupLogo();
         this.setupInstances();
@@ -241,8 +242,8 @@ export default _.assign( _.create( BaseObject ), {
             let interactive_x = instance.x_start + magnitude * input_x * -1 * ( 0.3 + 0.7 * Math.abs( instance.x_start ) );
             let interactive_y = instance.y_start + ( magnitude / this.window_data.ratio ) * input_y * ( 0.5 + Math.abs( instance.y_start ) * 0.5 );
 
-            let sequence_x = Easing.easeOutCubic( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
-            let sequence_y = Easing.easeOutCubic( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
+            let sequence_x = Easing.easeOutCubic( Math.abs( sequence_pos ) ) * sign( sequence_pos );
+            let sequence_y = Easing.easeOutCubic( Math.abs( sequence_pos ) ) * sign( sequence_pos );
 
             instance.x_target = interactive_x + sequence_x * 0.2;
             instance.y_target = interactive_y + sequence_y * 0.2;

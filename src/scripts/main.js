@@ -12,6 +12,9 @@ export default function () {
     const MAX_WIDTH_MOBILE = 599;
 
     const IE = detect_ie();
+    const FF = navigator.userAgent.toLowerCase().indexOf( 'firefox' ) > -1;
+    const SAFARI = navigator.userAgent.indexOf( 'Safari' ) != -1 && navigator.userAgent.indexOf( 'Chrome' ) == -1;
+    const IOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
     const TIME_START = Date.now();
 
@@ -29,6 +32,8 @@ export default function () {
 
     function start() {
 
+        if ( IE.flag || FF || ( SAFARI && !IOS ) ) { return; }
+
         ui = {
 
             window   : window,
@@ -40,9 +45,9 @@ export default function () {
         app_config = {
 
             IS_MOBILE: window.innerWidth <= MAX_WIDTH_MOBILE,
-            IS_IOS: /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream,
-            IS_SAFARI: navigator.userAgent.indexOf( 'Safari' ) != -1 && navigator.userAgent.indexOf( 'Chrome' ) == -1,
-            IS_FIREFOX: navigator.userAgent.toLowerCase().indexOf( 'firefox' ) > -1,
+            IS_IOS: IOS,
+            IS_SAFARI: SAFARI,
+            IS_FIREFOX: FF,
             IS_IE: IE.flag,
             IS_IE_EDGE: IE.flag && IE.version === 'Edge',
             IS_IE_11: IE.flag && IE.version === '11',
