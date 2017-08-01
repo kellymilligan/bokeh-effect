@@ -66,7 +66,6 @@ export default _.assign( _.create( BaseObject ), {
 
     canvas: null,
     ctx: null,
-    comp_ctx: null,
 
     pixel_ratio: 1,
 
@@ -96,12 +95,6 @@ export default _.assign( _.create( BaseObject ), {
 
         this.canvas = document.createElement( 'canvas' );
         this.ctx = this.canvas.getContext( '2d' );
-
-        let comp_canvas = document.createElement( 'canvas' );
-        this.comp_ctx = comp_canvas.getContext( '2d' );
-
-        comp_canvas.width = 200;
-        comp_canvas.height = 200;
 
         this.node.append( this.canvas );
 
@@ -183,15 +176,15 @@ export default _.assign( _.create( BaseObject ), {
 
     onResize() {
 
-        this.pixel_ratio = window.devicePixel_ratio || 1;
+        this.pixel_ratio = window.devicePixelRatio ? Math.min( window.devicePixelRatio, 2 ) : 1;
 
-        this.canvas.width = this.window_data.width * this.pixel_ratio;
-        this.canvas.height = this.window_data.height * this.pixel_ratio;
+        this.canvas.width = this.window_data.width;// * this.pixel_ratio;
+        this.canvas.height = this.window_data.height;// * this.pixel_ratio;
 
         this.canvas.style.width = this.window_data.width + 'px';
         this.canvas.style.height = this.window_data.height + 'px';
 
-        this.ctx.scale( this.pixel_ratio, this.pixel_ratio );
+        // this.ctx.scale( this.pixel_ratio, this.pixel_ratio );
     },
 
     onMouseMove() {
@@ -225,9 +218,9 @@ export default _.assign( _.create( BaseObject ), {
         for ( let i = 0; i < this.instance_count; i++ ) {
 
             let instance = this.instances[ i ];
-            let magnitude = this.gyro_data.available ? 0.3 : 0.15;
+            let magnitude = this.gyro_data.available ? 1 : 0.15;
 
-            let input_x = this.gyro_data.available ? this.gyro_data.n_a : this.mouse_data.n_x;
+            let input_x = this.gyro_data.available ? this.gyro_data.n_g : this.mouse_data.n_x;
             let input_y = this.gyro_data.available ? this.gyro_data.n_b : this.mouse_data.n_y;
 
             let interactive_x = instance.x_start + magnitude * input_x * -1 * ( 0.3 + 0.7 * Math.abs( instance.x_start ) );
@@ -264,7 +257,7 @@ export default _.assign( _.create( BaseObject ), {
         {
 
             // set coordinate space to center
-            ctx.translate( ctx.canvas.width * 0.5, ctx.canvas.height * 0.5 );
+            ctx.translate( this.window_data.width * 0.5, this.window_data.height * 0.5 );
 
             // Bokeh flares
             for ( let i = 0; i < this.instance_count; i++ ) {
@@ -293,8 +286,8 @@ export default _.assign( _.create( BaseObject ), {
         ctx.save();
         {
 
-            let x = instance.x * ( ctx.canvas.width * 0.5 );
-            let y = instance.y * ( ctx.canvas.height * 0.5 );
+            let x = instance.x * ( this.window_data.width * 0.5 );
+            let y = instance.y * ( this.window_data.height * 0.5 );
 
             let sharpness = clamp( ( Math.abs( instance.x ) + Math.abs( instance.y ) ) / 2, 0, 1 );
 
