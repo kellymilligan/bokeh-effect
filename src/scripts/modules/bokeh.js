@@ -226,8 +226,8 @@ export default _.assign( _.create( BaseObject ), {
             let interactive_x = instance.x_start + magnitude * input_x * -1 * ( 0.3 + 0.7 * Math.abs( instance.x_start ) );
             let interactive_y = instance.y_start + ( magnitude / this.window_data.ratio ) * input_y * ( 0.5 + Math.abs( instance.y_start ) * 0.5 );
 
-            let sequence_x = /*Easing.easeInOutSine*/( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
-            let sequence_y = /*Easing.easeInOutSine*/( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
+            let sequence_x = Easing.easeOutCubic( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
+            let sequence_y = Easing.easeOutCubic( Math.abs( sequence_pos ) ) * Math.sign( sequence_pos );
 
             instance.x_target = interactive_x + sequence_x * 0.2;
             instance.y_target = interactive_y + sequence_y * 0.2;
