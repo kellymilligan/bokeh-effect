@@ -1,4 +1,3 @@
-import { _ } from './common';
 import Bokeh from './modules/bokeh.js';
 
 import detect_ie from './utils/dom/detect_ie';
@@ -111,7 +110,7 @@ export default function () {
         onResize();
 
         // Start anim frame
-        _.defer( function () { raf = window.requestAnimationFrame( onAnimFrame ); } );
+        setTimeout( () => { raf = window.requestAnimationFrame( onAnimFrame ); }, 100 );
     }
 
     function addEvents() {
@@ -141,7 +140,7 @@ export default function () {
         window.cancelAnimationFrame( raf );
         removeEvents();
 
-        _.defer( () => {
+        setTimeout( () => {
 
             bokeh.destroy();
             ui.bokeh.parentNode.removeChild( ui.bokeh );
@@ -153,7 +152,7 @@ export default function () {
             ui = null;
             flow_list = null;
             bokeh = null;
-        } );
+        }, 100 );
     }
 
 
@@ -162,7 +161,7 @@ export default function () {
 
     function createPage(PageObject, node = null, options = {}) {
 
-        let page = _.create( PageObject );
+        let page = Object.create( PageObject );
 
         page.init({
 

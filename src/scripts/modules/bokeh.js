@@ -62,7 +62,7 @@ const COLOURS = [
 ];
 
 
-export default _.assign( _.create( BaseObject ), {
+export default Object.assign( Object.create( BaseObject ), {
 
 
     canvas: null,

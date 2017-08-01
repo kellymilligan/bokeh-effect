@@ -1,5 +1,3 @@
-import { _ } from '../common';
-
 export default {
 
 
@@ -33,7 +31,7 @@ export default {
 
     createChild(ChildObject, node = null, options = {}) {
 
-        let child = _.create( ChildObject );
+        let child = Object.create( ChildObject );
 
         child.init({
 
