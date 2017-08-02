@@ -13,7 +13,7 @@ import sign from '../utils/math/sign';
 import LOGO_BASE64 from './logo';
 
 const MIN_INSTANCES = 20;
-const MAX_INSTANCES = 150;
+const MAX_INSTANCES = 120;
 
 // Add more instances the wider the screen is, based on 100 at 1440px wide
 const INSTANCES = clamp( Math.round( 100 * ( window.innerWidth / 1440 ) ), MIN_INSTANCES, MAX_INSTANCES );
@@ -115,7 +115,7 @@ export default Object.assign( Object.create( BaseObject ), {
 
     setupLogo() {
 
-        let SCALE = 0.25;
+        let SCALE = window.innerWidth < 600 ? 0.12 : 0.2;
 
         this.logo_image = document.createElement( 'img' );
         this.logo_image.src = LOGO_BASE64;
@@ -174,7 +174,7 @@ export default Object.assign( Object.create( BaseObject ), {
     runSequence() {
 
         this.sequence_tween = new Tween(
-            6000,
+            3500,
             'easeInOutCubic',
             (value, progress) => { this.sequence_progress = progress; },
             () => {
@@ -224,8 +224,8 @@ export default Object.assign( Object.create( BaseObject ), {
 
         this.sequence_alpha = Easing.easeOutCubic( 1 - Math.abs( sequence_pos ) );
 
-        this.cursor_speed += 0.03 * distance( this.mouse_data.n_x, this.mouse_data.n_y, this.cursor_prev_x, this.cursor_prev_y );
-        this.cursor_speed = Math.min( this.cursor_speed, 0.12 );
+        this.cursor_speed += 0.025 * distance( this.mouse_data.n_x, this.mouse_data.n_y, this.cursor_prev_x, this.cursor_prev_y );
+        this.cursor_speed = Math.min( this.cursor_speed, 0.09 );
         this.cursor_prev_x = this.mouse_data.n_x;
         this.cursor_prev_y = this.mouse_data.n_y;
 
@@ -294,7 +294,9 @@ export default Object.assign( Object.create( BaseObject ), {
     drawBokeh(ctx, instance, time) {
 
         let offset = 50;
-        let radius = 100 * ( instance.scale
+        let multiplier = Math.max( Math.max( window.innerWidth / 1440, 1 ) * 0.8, 1 );
+
+        let radius = 100 * multiplier * ( instance.scale
             // Scale to x position
             + clamp( Math.abs( instance.x ), 0, 1 ) * -0.15
             // Scale to x position and sequence alpha
@@ -331,7 +333,7 @@ export default Object.assign( Object.create( BaseObject ), {
                 radius
             );
 
-            ctx.globalAlpha = this.sequence_alpha * ( ( this.cursor_speed + 0.07 * this.sequence_alpha ) * instance.alpha * 0.98 + 0.02 * Math.random() );
+            ctx.globalAlpha = this.sequence_alpha * ( ( this.cursor_speed + 0.04 * this.sequence_alpha ) * instance.alpha * 0.98 + 0.02 * Math.random() );
             ctx.fill();
 
         }
