@@ -104,6 +104,7 @@ export default Object.assign( Object.create( BaseObject ), {
         this.canvas.style.top = 0;
         this.canvas.style.width = '100%';
         this.canvas.style.height = '100%';
+        this.canvas.style.zIndex = 99999;
 
         this.resize();
 

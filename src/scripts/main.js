@@ -23,7 +23,8 @@ export default function () {
     let bokeh;
     let raf;
 
-    start();
+    // Global initiator
+    window._playIntro = start;
 
 
     // Setup
@@ -31,7 +32,7 @@ export default function () {
 
     function start() {
 
-        if ( IE.flag || FF || ( SAFARI && !IOS ) ) { return; }
+        if ( IE.flag || FF /*  || ( SAFARI && !IOS )  */ ) { return; }
 
         ui = {
 
