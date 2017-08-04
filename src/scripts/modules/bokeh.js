@@ -65,6 +65,8 @@ const COLOURS = [
 export default Object.assign( Object.create( BaseObject ), {
 
 
+    is_konami: false,
+
     canvas: null,
     ctx: null,
 
@@ -89,7 +91,9 @@ export default Object.assign( Object.create( BaseObject ), {
     // Setup
     // -----
 
-    setup() {
+    setup(options) {
+
+        if ( options.local_config.konami ) { this.is_konami = true; }
 
         this.canvas = document.createElement( 'canvas' );
         this.ctx = this.canvas.getContext( '2d' );
@@ -108,9 +112,20 @@ export default Object.assign( Object.create( BaseObject ), {
 
         this.resize();
 
-        setTimeout( () => {
-            this.runSequence();
-        }, 500 );
+        if ( this.is_konami ) {
+
+            let konami_tween = new Tween(
+                8000,
+                'easeInOutCubic',
+                (value, progress) => { this.sequence_progress = progress * 0.5; },
+                () => { konami_tween = null; }
+            );
+
+            konami_tween.start();
+        }
+        else {
+            setTimeout( () => { this.runSequence(); }, 500 );
+        }
     },
 
     setupLogo() {
@@ -174,7 +189,7 @@ export default Object.assign( Object.create( BaseObject ), {
     runSequence() {
 
         this.sequence_tween = new Tween(
-            3500,
+            4000,
             'easeInOutCubic',
             (value, progress) => { this.sequence_progress = progress; },
             () => {

@@ -25,12 +25,13 @@ export default function () {
 
     // Global initiator
     window._playIntro = start;
+    window._playKonami = () => start(true);
 
 
     // Setup
     // -----
 
-    function start() {
+    function start(konami) {
 
         if ( IE.flag || FF /*  || ( SAFARI && !IOS )  */ ) { return; }
 
@@ -39,7 +40,7 @@ export default function () {
             window   : window,
             document : document,
             html     : document.documentElement,
-            bokeh    : document.querySelector( '.js-bokeh' )
+            bokeh    : document.createElement( 'div' )
         };
 
         app_config = {
@@ -98,9 +99,11 @@ export default function () {
             n_g: 0
         };
 
+        document.body.appendChild( ui.bokeh );
+
         // Set up children
         flow_list = [];
-        bokeh = createPage( Bokeh, ui.bokeh );
+        bokeh = createPage( Bokeh, ui.bokeh, { konami: konami } );
         bokeh.parent_destroy = destroy;
         flow_length = flow_list.length;
 
