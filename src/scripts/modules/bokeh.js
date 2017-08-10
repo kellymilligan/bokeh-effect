@@ -130,13 +130,11 @@ export default Object.assign( Object.create( BaseObject ), {
 
     setupLogo() {
 
-        let SCALE = window.innerWidth < 600 ? 0.12 : 0.2;
-
         this.logo_image = document.createElement( 'img' );
         this.logo_image.src = LOGO_BASE64;
         // Use fixed dimensions as naturalWidth/Height sometimes returning as zero
-        this.logo_width = 512 * SCALE; // this.logo_image.naturalWidth * SCALE;
-        this.logo_height = 481 * SCALE; // this.logo_image.naturalHeight * SCALE;
+        this.logo_width = 256;
+        this.logo_height = 256;
     },
 
     setupInstances() {
@@ -355,10 +353,16 @@ export default Object.assign( Object.create( BaseObject ), {
         ctx.restore();
     },
 
+    logo_drawn: false,
+
     drawLogo(ctx, time) {
 
         ctx.save();
         {
+
+            let SCALE = window.innerWidth < 600 ? 0.25 : 0.5;
+
+            ctx.scale( SCALE, SCALE );
 
             ctx.globalCompositeOperation = 'lighter';
             ctx.globalAlpha = 0.25 * this.sequence_alpha;
