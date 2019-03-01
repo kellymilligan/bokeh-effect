@@ -10,10 +10,34 @@ import distance from '../utils/math/distance_2d';
 import clamp from '../utils/math/clamp';
 import sign from '../utils/math/sign';
 
-import LOGO_BASE64 from './logo';
+const INSTANCES = 120;
+const COLOURS = [
+    // '#f00',
+    // '#00f',
+    // '#0f0',
+    // '#ff0',
+    // '#f0f',
+    // '#0ff'
 
-const MIN_INSTANCES = 20;
-const MAX_INSTANCES = 120;
+    '#fcfaf4', // white
+    '#f9f3db', // white
+    '#f8eec8', // white
+    '#f5dea2', // white
+
+    '#fccd4a', // yellow
+    '#ffc113', // yellow
+    '#0f4aaa', // blue
+    '#407fbd', // blue
+
+    '#3b895f', // green
+    '#ffc113', // cyan
+    '#ff4c00', // orange
+    '#f86b2f', // orange
+
+    '#f01f1f', // red
+    '#f01f5a', // red
+    '#ff002a', // red
+    '#ed1111', // red
 
 // Add more instances the wider the screen is, based on 100 at 1440px wide
 const INSTANCES = clamp( Math.round( 100 * ( window.innerWidth / 1440 ) ), MIN_INSTANCES, MAX_INSTANCES );
