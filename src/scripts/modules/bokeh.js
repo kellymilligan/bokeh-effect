@@ -8,7 +8,7 @@ import simpleEase from '../utils/math/simple_ease';
 import distance from '../utils/math/distance_2d';
 import clamp from '../utils/math/clamp';
 
-const INSTANCES = 100;
+const INSTANCES = 120;
 const COLOURS = [
     // '#f00',
     // '#00f',

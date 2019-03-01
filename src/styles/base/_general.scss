@@ -13,7 +13,7 @@
 
 html {
 
-    overflow-y: scroll;
+    // overflow-y: scroll;
     height: auto;
 
 }
@@ -22,6 +22,6 @@ html {
 // * ::-webkit-scrollbar { display: none; }
 
 // Style scrollbars for webkit browsers
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-track { background: #fff; }
-::-webkit-scrollbar-thumb { background: #333; }
+// ::-webkit-scrollbar { width: 5px; }
+// ::-webkit-scrollbar-track { background: #fff; }
+// ::-webkit-scrollbar-thumb { background: #333; }
